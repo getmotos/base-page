@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟角色对话界面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #2b2b2b;
+            color: white;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin: 10px 0;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #444;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .bubble.user {
+            background-color: #007BFF;
+            color: white;
+            margin-left: auto;
+        }
+
+        .input-bar {
+            display: flex;
+            padding: 10px;
+            background-color: #1e1e1e;
+            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-bar input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-bar button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        .input-bar button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Message from character -->
+        <div class="message">
+            <div class="avatar">
+                <img src="character-avatar.png" alt="Avatar">
+            </div>
+            <div class="bubble">
+                嗨~！今天有什么需要帮忙的吗？
+            </div>
+        </div>
+
+        <!-- Message from user -->
+        <div class="message">
+            <div class="bubble user">
+                可以告诉我今天的天气吗？
+            </div>
+        </div>
+
+        <!-- Input bar -->
+        <div class="input-bar">
+            <input type="text" placeholder="输入消息...">
+            <button onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        function logDebug(message) {
+            console.log("[DEBUG]: " + message);
+        }
+
+        function sendMessage() {
+            const inputField = document.querySelector('.input-bar input');
+            const message = inputField.value;
+
+            logDebug("User typed message: " + message);
+
+            if (message.trim() === "") {
+                logDebug("No message entered.");
+                return;
+            }
+
+            logDebug("Message is being processed for display.");
+            
+            const chatContainer = document.querySelector('.chat-container');
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message');
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble', 'user');
+            bubble.textContent = message;
+
+            userMessage.appendChild(bubble);
+            chatContainer.insertBefore(userMessage, document.querySelector('.input-bar'));
+
+            inputField.value = "";
+
+            logDebug("Message displayed in chat window.");
+        }
+    </script>
+</body>
+</html>

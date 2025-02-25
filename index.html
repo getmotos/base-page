@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刘鑫展的个人页面</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>刘鑫展的个人页面</h1>
+
+        <div class="profile-card">
+            <img src="imgs/6.jpg" alt="刘鑫展的照片" class="profile-image">
+            <h2>刘鑫展</h2>
+            <p class="job-title">前端开发者</p>
+            <p class="bio">热爱编程和设计，致力于创造优秀的用户体验。</p>
+            <div class="skills">
+                <span class="skill-tag">HTML</span>
+                <span class="skill-tag">CSS</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">React</span>
+            </div>
+        </div>
+
+        <div class="social-icons">
+            <a href="#" id="bilibiliIcon" title="哔哩哔哩"><i class="fab fa-bilibili"></i></a>
+            <a href="https://www.douyin.com/user/MS4wLjABAAAAJdmH5REBlju4v5_7nEPxg-7_Cz6btOB1Wam8JsTB0RQ?from_tab_name=main"
+                target="_blank" title="抖音"><i class="fab fa-tiktok"></i></a>
+            <a href="#" id="wechatIcon" title="微信"><i class="fab fa-weixin"></i></a>
+        </div>
+    </div>
+
+    <button id="chatButton" class="chat-button"><i class="fas fa-comments"></i></button>
+
+    <div id="chatModal" class="chat-modal">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3>AI 助手</h3>
+                <button id="closeChatButton">&times;</button>
+            </div>
+            <div id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="输入你的问题...">
+                <button id="sendButton">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="accountModal" class="account-modal">
+        <div class="account-modal-content">
+            <span class="close">&times;</span>
+            <h2 id="accountModalTitle"></h2>
+            <p id="accountMessage" class="account-message"></p>
+            <input type="text" id="accountInput" placeholder="请输入您的账号">
+            <button id="submitAccount">提交</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2023 刘鑫展. 保留所有权利。</p>
+            <p>联系方式: <a href="mailto:liuxinzhan@example.com">liuxinzhan@example.com</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
