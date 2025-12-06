@@ -1,73 +1,404 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>某某的个人页面</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <title>Paper Letter Love</title>
+
+    <!-- Fonts: Ma Shan Zheng for Chinese Handwriting, Cedarville Cursive for English touches -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Cedarville+Cursive&display=swap"
+        rel="stylesheet">
+
+    <!-- MediaPipe Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --bg-paper: #fdfbf7;
+            --ink-color: #4a4a4a;
+            --accent-color: #d4a373;
+            /* Soft brownish gold */
+            --paper-shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--ink-color);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        /* Paper Grain Texture */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Hide Camera */
+        #input_video {
+            display: none;
+        }
+
+        /* Canvas for Paper Fragments */
+        #paper_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Main Text Container */
+        .container {
+            z-index: 10;
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .handwritten-text {
+            font-size: 4rem;
+            opacity: 0;
+            transform: translateY(20px) rotate(-1deg);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        /* Ink bleed effect for final text */
+        .handwritten-text.visible {
+            opacity: 1;
+            transform: translateY(0) rotate(0deg);
+        }
+
+        .handwritten-text.final {
+            font-size: 5rem;
+            color: #2c2c2c;
+            /* Simulating ink spreading */
+            animation: ink-spread 2s ease forwards;
+        }
+
+        @keyframes ink-spread {
+            0% {
+                filter: blur(2px);
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            100% {
+                filter: blur(0px);
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .sub-text {
+            margin-top: 20px;
+            font-family: 'Cedarville Cursive', cursive;
+            /* English script for contrast */
+            font-size: 1.2rem;
+            color: #888;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .sub-text.visible {
+            opacity: 0.6;
+        }
+
+        /* Loader */
+        #loader {
+            position: absolute;
+            bottom: 30px;
+            font-family: 'Cedarville Cursive', cursive;
+            color: #aaa;
+            font-size: 1rem;
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+    </style>
 </head>
 
 <body>
+
+    <video id="input_video"></video>
+    <canvas id="paper_canvas"></canvas>
+
     <div class="container">
-        <h1>刘鑫展的个人页面</h1>
-
-        <div class="profile-card">
-            <img src="imgs/6.jpg" alt="刘鑫展的照片" class="profile-image">
-            <h2>刘鑫展</h2>
-            <p class="job-title">前端开发者</p>
-            <p class="bio">热爱编程和设计，致力于创造优秀的用户体验。</p>
-            <div class="skills">
-                <span class="skill-tag">HTML</span>
-                <span class="skill-tag">CSS</span>
-                <span class="skill-tag">JavaScript</span>
-                <span class="skill-tag">React</span>
-            </div>
-        </div>
-
-        <div class="social-icons">
-            <a href="#" id="bilibiliIcon" title="哔哩哔哩"><i class="fab fa-bilibili"></i></a>
-            <a href="https://www.douyin.com/user/MS4wLjABAAAAJdmH5REBlju4v5_7nEPxg-7_Cz6btOB1Wam8JsTB0RQ?from_tab_name=main"
-                target="_blank" title="抖音"><i class="fab fa-tiktok"></i></a>
-            <a href="#" id="wechatIcon" title="微信"><i class="fab fa-weixin"></i></a>
-        </div>
+        <div class="handwritten-text" id="main_text"></div>
+        <div class="sub-text" id="sub_text"></div>
     </div>
 
-    <button id="chatButton" class="chat-button"><i class="fas fa-comments"></i></button>
+    <div id="loader">Preparing ink & paper...</div>
 
-    <div id="chatModal" class="chat-modal">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h3>AI 助手</h3>
-                <button id="closeChatButton">&times;</button>
-            </div>
-            <div id="chatMessages"></div>
-            <div class="chat-input">
-                <input type="text" id="userInput" placeholder="输入你的问题...">
-                <button id="sendButton">发送</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const mainText = document.getElementById('main_text');
+        const subText = document.getElementById('sub_text');
+        const loader = document.getElementById('loader');
+        const canvas = document.getElementById('paper_canvas');
+        const ctx = canvas.getContext('2d');
 
-    <div id="accountModal" class="account-modal">
-        <div class="account-modal-content">
-            <span class="close">&times;</span>
-            <h2 id="accountModalTitle"></h2>
-            <p id="accountMessage" class="account-message"></p>
-            <input type="text" id="accountInput" placeholder="请输入您的账号">
-            <button id="submitAccount">提交</button>
-        </div>
-    </div>
+        // --- Configuration ---
+        const MESSAGES = {
+            0: "",
+            1: "展信悦",           // "Pleasant opening of letter" (Standard formal/intimate opening)
+            2: "提笔想起你",       // "Thinking of you as I pick up the pen"
+            3: "纸短情长",         // "The paper is short, but the love is long"
+            4: "千言万语...",      // "Thousands of words..."
+            5: "我喜欢你"          // "I like you"
+        };
 
-    <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2023 刘鑫展. 保留所有权利。</p>
-            <p>联系方式: <a href="mailto:liuxinzhan@example.com">liuxinzhan@example.com</a></p>
-        </div>
-    </footer>
+        const HINTS = {
+            0: "",
+            1: "Opening the letter...",
+            2: "Drafting...",
+            3: "Words flowing...",
+            4: "Almost ready...",
+            5: "Yours."
+        };
 
-    <script src="script.js"></script>
+        // --- State ---
+        let fingerCount = 0;
+        let lastFingerCount = -1;
+        let stabilityCounter = 0;
+        let particles = [];
+        let isGathering = false; // State for 5 fingers
+
+        // --- Canvas & Particles ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class PaperFragment {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 50;
+                this.width = Math.random() * 20 + 10;
+                this.height = Math.random() * 15 + 8;
+                this.angle = Math.random() * Math.PI * 2;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.drift = (Math.random() - 0.5) * 1;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+                this.opacity = 0;
+                this.fadeIn = true;
+                // Color variations: white, off-white, light beige
+                const tones = ['#ffffff', '#fcfcfc', '#f0efe9'];
+                this.color = tones[Math.floor(Math.random() * tones.length)];
+            }
+
+            update() {
+                // If Gathering (5 Fingers), move to center
+                if (isGathering) {
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+
+                    // Lerp towards center
+                    this.x += (centerX - this.x) * 0.05;
+                    this.y += (centerY - this.y) * 0.05;
+                    this.rotationSpeed += 0.01; // Spin faster as they gather
+                    this.angle += this.rotationSpeed;
+
+                    // Fade out as they merge into the "text"
+                    const dist = Math.hypot(centerX - this.x, centerY - this.y);
+                    if (dist < 100) {
+                        this.opacity -= 0.05;
+                    }
+                } else {
+                    // Normal drifting up
+                    this.y -= this.speedY;
+                    this.x += Math.sin(this.y * 0.01) + this.drift;
+                    this.angle += this.rotationSpeed;
+
+                    if (this.fadeIn) {
+                        this.opacity += 0.02;
+                        if (this.opacity >= 0.8) this.fadeIn = false;
+                    }
+                }
+            }
+
+            draw() {
+                if (this.opacity <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                // Draw Paper Scrap
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = "rgba(0,0,0,0.1)";
+                ctx.shadowBlur = 5;
+                ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+                // Optional: tiny line of text on the paper
+                ctx.fillStyle = "#ccc";
+                ctx.fillRect(-this.width / 3, -2, this.width / 1.5, 1);
+
+                ctx.restore();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Spawn particles based on finger count (1-4)
+            // 5 fingers stops spawning to let them gather
+            if (fingerCount > 0 && fingerCount < 5) {
+                // More fingers = more fragments
+                if (Math.random() < (fingerCount * 0.05)) {
+                    particles.push(new PaperFragment());
+                }
+            }
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Remove logic
+                if (particles[i].opacity <= 0 || (particles[i].y < -50 && !isGathering)) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- Interaction Logic ---
+        function updateUI(count) {
+            // Reset special effects
+            mainText.classList.remove('visible', 'final');
+            subText.classList.remove('visible');
+
+            // Allow animation frame reset
+            void mainText.offsetWidth;
+
+            if (count === 0) {
+                isGathering = false;
+                mainText.innerText = "";
+                subText.innerText = "";
+            } else {
+                mainText.innerText = MESSAGES[count];
+                subText.innerText = HINTS[count];
+
+                // Trigger transitions
+                mainText.classList.add('visible');
+                if (count > 0) subText.classList.add('visible');
+
+                if (count === 5) {
+                    isGathering = true;
+                    mainText.classList.add('final');
+                    // "Ink" appears after particles gather slightly
+                } else {
+                    isGathering = false;
+                }
+            }
+        }
+
+        // --- Hand Tracking ---
+        function countFingers(landmarks) {
+            let c = 0;
+            // Thumb
+            if (Math.abs(landmarks[4].x - landmarks[17].x) > Math.abs(landmarks[3].x - landmarks[17].x)) c++;
+            // Fingers
+            if (landmarks[8].y < landmarks[6].y) c++;
+            if (landmarks[12].y < landmarks[10].y) c++;
+            if (landmarks[16].y < landmarks[14].y) c++;
+            if (landmarks[20].y < landmarks[18].y) c++;
+            return c;
+        }
+
+        function onResults(results) {
+            loader.style.display = 'none';
+            let detected = 0;
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                detected = countFingers(results.multiHandLandmarks[0]);
+            }
+
+            // Stabilization
+            if (detected === fingerCount) {
+                stabilityCounter++;
+            } else {
+                fingerCount = detected;
+                stabilityCounter = 0;
+            }
+
+            if (stabilityCounter > 8 && fingerCount !== lastFingerCount) {
+                lastFingerCount = fingerCount;
+                updateUI(fingerCount);
+            }
+        }
+
+        const hands = new Hands({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+
+        hands.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480
+        });
+
+        camera.start();
+
+    </script>
 </body>
 
 </html>
